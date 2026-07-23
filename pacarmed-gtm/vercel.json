@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
+  "functions": {
+    "api/contact.js": { "maxDuration": 10 }
+  }
+}

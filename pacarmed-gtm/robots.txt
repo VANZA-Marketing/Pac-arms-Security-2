@@ -1,0 +1,21 @@
+# Pac Armed Security
+User-agent: *
+Allow: /
+
+# AI / answer-engine crawlers — explicitly allowed
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://pacarmedsecurity.com/sitemap.xml
