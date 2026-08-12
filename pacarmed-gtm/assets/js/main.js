@@ -1,6 +1,26 @@
 'use strict';
 var t=document.getElementById('menuToggle'), nav=document.getElementById('mainNav');
-if(t&&nav){t.addEventListener('click',function(){var o=nav.classList.toggle('mobile-open');t.setAttribute('aria-expanded',o?'true':'false');});}
+if(t&&nav){
+ t.addEventListener('click',function(){
+  var o=nav.classList.toggle('mobile-open');
+  t.setAttribute('aria-expanded',o?'true':'false');
+  if(!o){nav.querySelectorAll('.has-dropdown.open').forEach(function(li){li.classList.remove('open');var la=li.querySelector('a');if(la)la.setAttribute('aria-expanded','false');});}
+ });
+ /* Mobile: tap a parent item (Services / Industries) to expand its submenu,
+    instead of every submenu showing open. Desktop keeps hover + click-through. */
+ nav.querySelectorAll('.has-dropdown>a').forEach(function(a){
+  a.setAttribute('aria-haspopup','true');
+  a.setAttribute('aria-expanded','false');
+  a.addEventListener('click',function(e){
+   if(!(window.matchMedia&&window.matchMedia('(max-width:768px)').matches))return;
+   e.preventDefault();
+   var li=a.parentNode, open=li.classList.contains('open');
+   nav.querySelectorAll('.has-dropdown.open').forEach(function(o){if(o!==li){o.classList.remove('open');var oa=o.querySelector('a');if(oa)oa.setAttribute('aria-expanded','false');}});
+   li.classList.toggle('open',!open);
+   a.setAttribute('aria-expanded',!open?'true':'false');
+  });
+ });
+}
 window.addEventListener('scroll',function(){var h=document.getElementById('siteHeader');if(h)h.classList.toggle('scrolled',window.scrollY>10);},{passive:true});
 var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:0.07,rootMargin:'0px 0px -30px 0px'});
 document.querySelectorAll('.animate').forEach(function(el){obs.observe(el);});
