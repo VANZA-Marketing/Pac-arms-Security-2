@@ -1,16 +1,13 @@
 // Vercel Serverless Function — POST /api/contact
-// Receives the contact form, verifies the Cloudflare Turnstile captcha,
-// drops obvious bots, then emails the submission to info@pacarmed.com.
+// Receives the contact form, drops obvious bots (honeypot), then emails
+// the submission via Resend.
 //
-// SETUP (see SETUP-VERCEL.md):
-//   Captcha:  set  TURNSTILE_SECRET_KEY  (Cloudflare Turnstile secret key)
-//   Email:    set  RESEND_API_KEY        (from resend.com)
-//             optional  CONTACT_TO   (defaults to info@pacarmed.com)
-//             optional  CONTACT_FROM (defaults to "PAC Armed Website <noreply@pacarmed.com>")
-//
-// Local testing without real keys: Cloudflare test keys —
-//   site key   1x00000000000000000000AA   (in the HTML, always passes)
-//   secret key 1x0000000000000000000000000000000AA
+// SETUP:
+//   Email: set  RESEND_API_KEY  (from resend.com) in Vercel env vars.
+//     optional  CONTACT_TO   (defaults to info@pacarmed.com)
+//     optional  CONTACT_FROM (defaults to "PAC Armed Website <noreply@pacarmed.com>")
+//   The CONTACT_FROM address's domain must be verified in Resend, otherwise
+//   Resend rejects the send.
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -34,38 +31,7 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ ok: false, error: "missing_fields" });
   }
 
-  // 3) Verify the Cloudflare Turnstile captcha.
-  const token = body["cf-turnstile-response"];
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) {
-    console.error("TURNSTILE_SECRET_KEY is not set in the environment.");
-    return res.status(500).json({ ok: false, error: "server_not_configured" });
-  }
-  if (!token) {
-    return res.status(400).json({ ok: false, error: "captcha_missing" });
-  }
-  try {
-    const ip =
-      req.headers["cf-connecting-ip"] ||
-      (req.headers["x-forwarded-for"] || "").split(",")[0].trim();
-    const verifyRes = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ secret: secret, response: token, remoteip: ip }),
-      }
-    );
-    const outcome = await verifyRes.json();
-    if (!outcome.success) {
-      return res.status(400).json({ ok: false, error: "captcha_failed" });
-    }
-  } catch (err) {
-    console.error("Turnstile verification error:", err);
-    return res.status(502).json({ ok: false, error: "captcha_unavailable" });
-  }
-
-  // Passed the captcha — assemble a clean payload.
+  // 3) Assemble a clean payload. (Captcha removed — the honeypot above still drops bots.)
   const submission = {
     name: name,
     email: email,
@@ -90,8 +56,8 @@ module.exports = async function handler(req, res) {
 // --- Email delivery via Resend (https://resend.com) -------------------------
 async function sendEmail(s) {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_TO || "info@pacarmed.com";
-  const from = process.env.CONTACT_FROM || "PAC Armed Website <noreply@pacarmed.com>";
+  const to = process.env.CONTACT_TO || "info@pacarmedsecurity.com";
+  const from = process.env.CONTACT_FROM || "Pac Armed Security <noreply@pacarmedsecurity.com>";
 
   if (!apiKey) {
     console.warn(

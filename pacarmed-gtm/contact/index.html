@@ -100,10 +100,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="form-group"><label for="cf-service">Security Need</label><select id="cf-service" name="service"><option>Not sure / general inquiry</option><option>Armed Security Guards</option><option>Unarmed Security Guards</option><option>Mobile Patrol</option><option>Event Security</option><option>Construction Site Security</option><option>Commercial Property Security</option><option>Apartment, Condo & HOA Security</option><option>Hotel & Resort Security</option><option>Retail Security</option><option>Executive Protection</option><option>Access Control Support</option><option>Fire Watch Security</option></select></div>
     </div>
     <div class="form-group"><label for="cf-message">Message</label><textarea id="cf-message" name="message" placeholder="Tell us about your property, location, hours to cover, and what you need protected..."></textarea></div>
-    <!-- Cloudflare Turnstile captcha. Replace data-sitekey with your real Turnstile SITE key from the Cloudflare dashboard.
-         The value below is Cloudflare's public TEST key: the widget renders and always passes, so swap it before launch. -->
-    <div class="cf-turnstile form-recaptcha" data-sitekey="1x00000000000000000000AA" data-theme="light"></div>
-    <p id="cf-captcha-msg" class="form-captcha-msg" role="alert" hidden>Please complete the captcha before sending.</p>
+    <p id="cf-captcha-msg" class="form-captcha-msg" role="alert" hidden></p>
     <div class="form-submit"><button type="submit" class="btn btn-primary">Send request <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 19.07 19.14" fill="currentColor" style="width:14px;height:14px;flex-shrink:0"><polygon points="19.01 .01 19.01 0 7.72 0 7.72 2 15.73 2 0 17.73 1.41 19.14 17.07 3.48 17.07 11.31 19.07 11.31 19.07 .01 19.01 .01"/></svg></button></div>
   </form>
 </div></div></div></section></main>
@@ -154,7 +151,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <input type="text" name="name"><input type="tel" name="phone"><input type="email" name="email"><input type="text" name="company">
 <input type="text" name="location"><input type="text" name="service"><input type="text" name="start"><input type="text" name="schedule">
 <input type="text" name="urgency"><textarea name="message"></textarea></form>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script src="/assets/js/main.js" defer></script>
 <script src="/assets/js/chatbot.js" defer></script>
 </body>

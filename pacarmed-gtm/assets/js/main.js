@@ -34,16 +34,13 @@ function post(f,btn,okText){var body=new FormData(f);btn.disabled=true;btn.textC
 function submitContact(e){
  e.preventDefault();
  var f=e.target, msg=document.getElementById('cf-captcha-msg'), btn=f.querySelector('button[type=submit]');
- var tokenEl=f.querySelector('[name="cf-turnstile-response"]');
- var token=tokenEl?tokenEl.value:'';
- if(!token){ if(msg){msg.textContent='Please complete the captcha before sending.';msg.hidden=false;} return false; }
  if(msg)msg.hidden=true;
  var data={}; new FormData(f).forEach(function(v,k){data[k]=v;});
  var original=btn.innerHTML; btn.disabled=true; btn.textContent='Sending\u2026';
- fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+ fetch('/api/contact/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(function(r){return r.json().then(function(j){return {ok:r.ok&&j&&j.ok,j:j};}).catch(function(){return {ok:r.ok,j:null};});})
-  .then(function(res){ if(!res.ok) throw 0; btn.textContent='Request sent \u2713'; f.reset(); if(window.turnstile)try{turnstile.reset();}catch(_){} })
-  .catch(function(){ btn.disabled=false; btn.innerHTML=original; if(window.turnstile)try{turnstile.reset();}catch(_){}
+  .then(function(res){ if(!res.ok) throw 0; btn.textContent='Request sent \u2713'; f.reset(); })
+  .catch(function(){ btn.disabled=false; btn.innerHTML=original;
     if(msg){msg.textContent='Sorry, that didn\u2019t send. Please try again or call (808) 435-5022.';msg.hidden=false;} });
  return false;
 }
