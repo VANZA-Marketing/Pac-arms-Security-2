@@ -625,11 +625,14 @@ a,button,.btn,.nav-link{touch-action:manipulation}
 @media(max-width:360px){.form-recaptcha{transform:scale(.92);transform-origin:left top}}
 
 /* ---- Testimonials (Google reviews) ---- */
-.t-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:900px;margin:8px auto 0}
-.t-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:26px 24px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-.t-stars{color:#161616;font-size:16px;letter-spacing:3px;margin-bottom:14px}
-.t-quote{font-size:15px;line-height:1.7;color:var(--text);margin:0 0 18px;flex:1}
-.t-author{border-top:1px solid var(--border);padding-top:14px}
-.t-name{display:block;font-family:var(--font-head);font-weight:700;color:var(--text);font-size:14.5px}
-.t-meta{display:block;font-size:12.5px;color:var(--text-muted);margin-top:3px}
-@media(max-width:760px){.t-grid{grid-template-columns:1fr}}
+.t-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;max-width:940px;margin:12px auto 0}
+.t-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:34px 32px;display:flex;flex-direction:column;box-shadow:0 2px 20px rgba(15,29,46,.05);transition:transform .2s ease,box-shadow .2s ease}
+.t-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(15,29,46,.09)}
+.t-stars{color:#1a1a1a;font-size:15px;letter-spacing:4px;margin-bottom:18px}
+.t-quote{font-size:15.5px;line-height:1.75;color:var(--text);margin:0 0 24px;flex:1}
+.t-author{display:flex;align-items:center;gap:13px;border-top:1px solid var(--border);padding-top:20px}
+.t-avatar{width:42px;height:42px;border-radius:50%;background:var(--navy);color:#fff;font-family:var(--font-head);font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center;flex:none}
+.t-who{display:flex;flex-direction:column;line-height:1.35}
+.t-name{font-family:var(--font-head);font-weight:700;color:var(--text);font-size:15px}
+.t-meta{font-size:12.5px;color:var(--text-muted)}
+@media(max-width:760px){.t-grid{grid-template-columns:1fr}.t-card{padding:28px 24px}}
