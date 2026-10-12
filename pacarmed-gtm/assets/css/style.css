@@ -623,3 +623,13 @@ a,button,.btn,.nav-link{touch-action:manipulation}
 .form-captcha-msg{color:#b00020;font-size:13px;margin:2px 0 0}
 .form-captcha-msg[hidden]{display:none}
 @media(max-width:360px){.form-recaptcha{transform:scale(.92);transform-origin:left top}}
+
+/* ---- Testimonials (Google reviews) ---- */
+.t-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:900px;margin:8px auto 0}
+.t-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:26px 24px;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.t-stars{color:#161616;font-size:16px;letter-spacing:3px;margin-bottom:14px}
+.t-quote{font-size:15px;line-height:1.7;color:var(--text);margin:0 0 18px;flex:1}
+.t-author{border-top:1px solid var(--border);padding-top:14px}
+.t-name{display:block;font-family:var(--font-head);font-weight:700;color:var(--text);font-size:14.5px}
+.t-meta{display:block;font-size:12.5px;color:var(--text-muted);margin-top:3px}
+@media(max-width:760px){.t-grid{grid-template-columns:1fr}}
