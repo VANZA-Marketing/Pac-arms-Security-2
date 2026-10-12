@@ -1,13 +1,40 @@
 // Vercel Serverless Function — POST /api/contact
-// Receives the contact form, drops obvious bots (honeypot), then emails
-// the submission via Resend.
+// Receives the contact form, blocks bots/abuse, then emails the submission via Resend.
+//
+// Security measures:
+//   - Same-origin guard (blocks direct/cross-site abuse of the endpoint)
+//   - Honeypot (drops obvious bots)
+//   - Strict input validation + length caps + control-char stripping
+//   - Oversized-payload guard
+//   - No full PII written to logs (email masked, message body not logged)
+//   - HTML-escaped email output (no injection into the notification email)
 //
 // SETUP:
-//   Email: set  RESEND_API_KEY  (from resend.com) in Vercel env vars.
-//     optional  CONTACT_TO   (defaults to info@pacarmed.com)
-//     optional  CONTACT_FROM (defaults to "PAC Armed Website <noreply@pacarmed.com>")
-//   The CONTACT_FROM address's domain must be verified in Resend, otherwise
-//   Resend rejects the send.
+//   Set RESEND_API_KEY in Vercel env vars (Production). The CONTACT_FROM domain
+//   must be verified in Resend. Optional: CONTACT_TO, CONTACT_FROM.
+
+const ALLOWED_HOSTS = ["pacarmedsecurity.com", "www.pacarmedsecurity.com"];
+
+// Only accept submissions that originate from our own site (real browser form
+// posts always send Origin/Referer). Blocks naive scripted spam to the endpoint.
+function originAllowed(req) {
+  const hay = ((req.headers["origin"] || "") + " " + (req.headers["referer"] || "")).toLowerCase();
+  if (!hay.trim()) return false; // no browser context -> likely a bot/script
+  if (ALLOWED_HOSTS.some(function (h) { return hay.indexOf("//" + h) !== -1 || hay.indexOf("." + h) !== -1; })) return true;
+  if (hay.indexOf(".vercel.app") !== -1) return true; // Vercel preview/prod URLs
+  return false;
+}
+
+const LIMITS = { name: 120, email: 200, phone: 40, company: 160, location: 120, service: 120, training: 160, message: 4000 };
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function clean(v, max) {
+  return String(v == null ? "" : v).replace(/[\u0000-\u001F\u007F]+/g, " ").trim().slice(0, max);
+}
+function maskEmail(e) {
+  const parts = String(e).split("@");
+  return parts[1] ? (parts[0].slice(0, 2) + "***@" + parts[1]) : "***";
+}
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -15,41 +42,56 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ ok: false, error: "method_not_allowed" });
   }
 
-  // Vercel parses JSON and urlencoded bodies into req.body automatically.
+  // Same-origin guard.
+  if (!originAllowed(req)) {
+    return res.status(403).json({ ok: false, error: "forbidden" });
+  }
+
+  // Oversized-payload guard.
+  const raw = typeof req.body === "string" ? req.body : JSON.stringify(req.body || {});
+  if (raw && raw.length > 20000) {
+    return res.status(413).json({ ok: false, error: "payload_too_large" });
+  }
+
   const body = typeof req.body === "string" ? safeParse(req.body) : (req.body || {});
 
-  // 1) Honeypot: real users never fill this hidden field. Silently accept + drop.
+  // Honeypot: real users never fill this hidden field. Silently accept + drop.
   if (body["bot-field"]) {
     return res.status(200).json({ ok: true });
   }
 
-  // 2) Basic required-field validation.
-  const name = (body.name || "").trim();
-  const email = (body.email || "").trim();
-  const phone = (body.phone || "").trim();
+  // Validate + sanitize.
+  const name = clean(body.name, LIMITS.name);
+  const email = clean(body.email, LIMITS.email);
+  const phone = clean(body.phone, LIMITS.phone);
   if (!name || !email || !phone) {
     return res.status(400).json({ ok: false, error: "missing_fields" });
   }
+  if (!EMAIL_RE.test(email)) {
+    return res.status(400).json({ ok: false, error: "invalid_email" });
+  }
 
-  // 3) Assemble a clean payload. (Captcha removed — the honeypot above still drops bots.)
   const submission = {
     name: name,
     email: email,
     phone: phone,
-    company: (body.company || "").trim(),
-    location: (body.location || "").trim(),
-    service: (body.service || "").trim(),
-    training: (body.training || "").trim(),
-    message: (body.message || "").trim(),
+    company: clean(body.company, LIMITS.company),
+    location: clean(body.location, LIMITS.location),
+    service: clean(body.service, LIMITS.service),
+    training: clean(body.training, LIMITS.training),
+    message: clean(body.message, LIMITS.message),
     receivedAt: new Date().toISOString(),
   };
 
-  // Log to the Vercel function logs as a backstop so nothing is ever lost.
-  console.log("New contact submission:", JSON.stringify(submission));
+  // Backstop log WITHOUT full PII (no message body; email masked).
+  console.log("Contact submission received:", JSON.stringify({
+    name: submission.name,
+    email: maskEmail(submission.email),
+    service: submission.service,
+    at: submission.receivedAt,
+  }));
 
-  // Email the submission (routed to info@pacarmed.com).
   await sendEmail(submission);
-
   return res.status(200).json({ ok: true });
 };
 
@@ -60,9 +102,7 @@ async function sendEmail(s) {
   const from = process.env.CONTACT_FROM || "Pac Armed Security <noreply@pacarmedsecurity.com>";
 
   if (!apiKey) {
-    console.warn(
-      "RESEND_API_KEY is not set — email not sent. The submission is in the logs above."
-    );
+    console.warn("RESEND_API_KEY is not set — email not sent.");
     return;
   }
 
@@ -113,11 +153,10 @@ async function sendEmail(s) {
       body: JSON.stringify(payload),
     });
     if (!r.ok) {
-      console.error("Resend error", r.status, await r.text());
+      console.error("Resend error", r.status);
     }
   } catch (err) {
-    // Never block the visitor on an email failure — it's captured in the logs.
-    console.error("Email send failed:", err);
+    console.error("Email send failed:", err && err.message ? err.message : "unknown");
   }
 }
 
