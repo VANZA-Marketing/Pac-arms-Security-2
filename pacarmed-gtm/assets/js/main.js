@@ -30,7 +30,7 @@ function showFileName(inp){var el=document.getElementById('ap-resume-name');if(!
   el.textContent='\u2713 '+f.name+' ('+Math.round(f.size/1024)+' KB)';el.classList.add('show');}else{el.classList.remove('show');}}
 function post(f,btn,okText){var body=new FormData(f);btn.disabled=true;btn.textContent='Sending\u2026';
  fetch('/',{method:'POST',body:body}).then(function(r){if(!r.ok)throw 0;btn.textContent=okText;f.reset();})
- .catch(function(){btn.textContent='Call (808) 435-5022';btn.disabled=false;});return false;}
+ .catch(function(){btn.textContent='Call (808) 857-4055';btn.disabled=false;});return false;}
 function submitContact(e){
  e.preventDefault();
  var f=e.target, msg=document.getElementById('cf-captcha-msg'), btn=f.querySelector('button[type=submit]');
@@ -41,7 +41,7 @@ function submitContact(e){
   .then(function(r){return r.json().then(function(j){return {ok:r.ok&&j&&j.ok,j:j};}).catch(function(){return {ok:r.ok,j:null};});})
   .then(function(res){ if(!res.ok) throw 0; btn.textContent='Request sent \u2713'; f.reset(); })
   .catch(function(){ btn.disabled=false; btn.innerHTML=original;
-    if(msg){msg.textContent='Sorry, that didn\u2019t send. Please try again or call (808) 435-5022.';msg.hidden=false;} });
+    if(msg){msg.textContent='Sorry, that didn\u2019t send. Please try again or call (808) 857-4055.';msg.hidden=false;} });
  return false;
 }
 function submitApplication(e){e.preventDefault();return post(e.target,e.target.querySelector('button[type=submit]'),'Application sent \u2713');}

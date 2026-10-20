@@ -2,7 +2,7 @@
    Self-contained: injects its own styles + UI. Add with:
    <script src="assets/js/chatbot.js" defer></script>  */
 (function () {
-  var PHONE = "(808) 435-5022", TEL = "tel:+18084355022";
+  var PHONE = "(808) 857-4055", TEL = "tel:+18088574055";
 
   var GREETING = "Aloha, I\u2019m the Pac Armed Security assistant. I can help you request armed guards, unarmed guards, mobile patrol, fire watch, event security, construction site security, or property patrol. What type of security coverage do you need?";
   var URGENT = "This sounds time-sensitive. Please call Pac Armed Security now at " + PHONE + ". I can also collect your details so the team can follow up.";
