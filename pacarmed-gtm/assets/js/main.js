@@ -44,7 +44,34 @@ function submitContact(e){
     if(msg){msg.textContent='Sorry, that didn\u2019t send. Please try again or call (808) 857-4055.';msg.hidden=false;} });
  return false;
 }
-function submitApplication(e){e.preventDefault();return post(e.target,e.target.querySelector('button[type=submit]'),'Application sent \u2713');}
+function submitApplication(e){
+ e.preventDefault();
+ var f=e.target, btn=f.querySelector('button[type=submit]'), original=btn.innerHTML;
+ var msg=document.getElementById('ap-resume-name');
+ var data={};
+ new FormData(f).forEach(function(v,k){
+   if(k==='resume') return; // file handled separately
+   if(data[k]===undefined){ data[k]=v; }
+   else { if(!Array.isArray(data[k])) data[k]=[data[k]]; data[k].push(v); }
+ });
+ function send(resume){
+   data.resume=resume||null;
+   btn.disabled=true; btn.textContent='Sending\u2026';
+   fetch('/api/apply/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .then(function(r){return r.json().then(function(j){return {ok:r.ok&&j&&j.ok};}).catch(function(){return {ok:r.ok};});})
+    .then(function(res){ if(!res.ok) throw 0; btn.textContent='Application sent \u2713'; f.reset(); if(msg)msg.classList.remove('show'); })
+    .catch(function(){ btn.disabled=false; btn.innerHTML=original; if(msg){ msg.textContent='Sorry, that didn\u2019t send. Please try again or call (808) 857-4055.'; msg.classList.add('show'); } });
+ }
+ var fileEl=document.getElementById('ap-resume'), file=fileEl&&fileEl.files&&fileEl.files[0];
+ if(file){
+   if(file.size>3.5*1024*1024){ if(msg){ msg.textContent='Resume is over 3.5MB \u2014 please compress it or email it separately.'; msg.classList.add('show'); } return false; }
+   var reader=new FileReader();
+   reader.onload=function(){ var s=String(reader.result); send({filename:file.name, type:file.type, content:s.slice(s.indexOf(',')+1)}); };
+   reader.onerror=function(){ send(null); };
+   reader.readAsDataURL(file);
+ } else { send(null); }
+ return false;
+}
 
 /* ---- Training Academy: expandable course details (progressive enhancement) ----
    Cards ship fully expanded so the syllabus is readable without JS.
