@@ -98,7 +98,7 @@ module.exports = async function handler(req, res) {
 // --- Email delivery via Resend (https://resend.com) -------------------------
 async function sendEmail(s) {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_TO || "info@pacarmedsecurity.com";
+  const to = process.env.CONTACT_TO || "info@pacarmed.com";
   const from = process.env.CONTACT_FROM || "Pac Armed Security <noreply@pacarmedsecurity.com>";
 
   if (!apiKey) {

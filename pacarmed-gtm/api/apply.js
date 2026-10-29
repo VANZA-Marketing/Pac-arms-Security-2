@@ -80,7 +80,7 @@ module.exports = async function handler(req, res) {
   console.log("Job application received:", JSON.stringify({ name: first + " " + last, email: maskEmail(email), at: new Date().toISOString(), hasResume: !!(body.resume && body.resume.content) }));
 
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.APPLY_TO || process.env.CONTACT_TO || "info@pacarmedsecurity.com";
+  const to = process.env.APPLY_TO || process.env.CONTACT_TO || "info@pacarmed.com";
   const from = process.env.CONTACT_FROM || "Pac Armed Security <noreply@pacarmedsecurity.com>";
   if (!apiKey) { console.warn("RESEND_API_KEY not set — application not emailed."); return res.status(200).json({ ok: true }); }
 
